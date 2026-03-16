@@ -10,7 +10,7 @@ const path = require('path');
 const { createAllTables, verifyTables } = require('./utils/schemaManager');
 
 const dbPath = path.join(__dirname, 'database', 'ecommerce.db');
-const schemaDir = path.join(__dirname, 'migrations', 'schema');
+const schemaDir = path.join(__dirname, 'migrations', 'schema');   
 
 console.log('🚀 Database Schema Initializer\n');
 console.log('Database:', dbPath);
