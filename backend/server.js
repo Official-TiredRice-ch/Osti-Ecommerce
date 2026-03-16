@@ -8,7 +8,7 @@ const logger = require('./utils/logger');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 24365;
+const PORT = process.env.PORT || 1234;
 
 // Middleware
 app.use(cors({
