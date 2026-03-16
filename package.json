@@ -1,7 +1,6 @@
 {
   "dependencies": {
-    "git": "^0.1.5",
-    "scandir": "^0.1.2"
+    "git": "^0.1.5"
   },
   "name": "osti-ecommerce",
   "version": "1.0.0",
