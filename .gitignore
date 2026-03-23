@@ -70,8 +70,12 @@ Thumbs.db
 *.tmp
 *.temp
 
+
 # Misc
 .cache/
 .parcel-cache/
 .yarn-integrity
 .npm
+
+# needed for developers implementation
+**/documentation/
