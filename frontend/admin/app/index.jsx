@@ -13,14 +13,18 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Input from "../components/login/Input";
 import Button from "../components/login/Button";
 import Card from "../components/login/Card";
+import { authAPI } from "../utils/api";
 import { COLORS, TYPOGRAPHY, SPACING, BORDER_RADIUS } from "../constants/login/theme";
 
 const { width, height } = Dimensions.get("window");
 
 export default function Page() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
@@ -38,7 +42,7 @@ export default function Page() {
     
     if (!password.trim()) {
       newErrors.password = "Password is required";
-    } else if (password.length < 8) {
+    } else if (password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
     
@@ -50,14 +54,47 @@ export default function Page() {
     if (!validateForm()) return;
     
     setLoading(true);
+    setErrors({});
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log("Login successful", { email, password });
-      // Navigate to dashboard or handle successful login
+      const response = await authAPI.login(email, password);
+      
+      // Check if user is admin or staff
+      if (response.user.role !== 'admin' && response.user.role !== 'staff') {
+        setErrors({ general: "Access denied. Admin or staff role required." });
+        setLoading(false);
+        return;
+      }
+
+      // Check if account is active
+      if (response.user.status !== 'active') {
+        setErrors({ general: "Your account has been disabled. Please contact support." });
+        setLoading(false);
+        return;
+      }
+
+      // Store user data
+      await AsyncStorage.setItem('user', JSON.stringify(response.user));
+      
+      console.log("Login successful", response.user);
+      
+      // Navigate to dashboard
+      router.replace('/dashboard');
+      
     } catch (error) {
       console.error("Login failed:", error);
-      setErrors({ general: "Invalid email or password" });
+      
+      if (error.response) {
+        // Server responded with error
+        const errorMessage = error.response.data?.error || "Login failed";
+        setErrors({ general: errorMessage });
+      } else if (error.request) {
+        // Request made but no response
+        setErrors({ general: "Cannot connect to server. Please check your connection." });
+      } else {
+        // Something else happened
+        setErrors({ general: "An unexpected error occurred. Please try again." });
+      }
     } finally {
       setLoading(false);
     }
