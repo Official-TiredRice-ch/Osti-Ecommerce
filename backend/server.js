@@ -47,7 +47,23 @@ async function initializeDatabase() {
 }
 
 // Routes
+const userRoutes = require('./src/routes/user');
+const auditRoutes = require('./src/routes/audit');
+const searchHistoryRoutes = require('./src/routes/searchHistory');
+const searchEngineRoutes = require('./src/routes/searchEngine');
+const categoryRoutes = require('./src/routes/category');
+const wishlistRoutes = require('./src/routes/wishlist');
+const biodataRoutes = require('./src/routes/biodata');
+const productRoutes = require('./src/routes/product');
 
+app.use('/api/users', userRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/search-history', searchHistoryRoutes);
+app.use('/api/search-engines', searchEngineRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/biodata', biodataRoutes);
+app.use('/api/products', productRoutes);
 
 // Test discovery route directly
 app.get('/api/test-discovery', (req, res) => {
