@@ -2,7 +2,7 @@
   "expo": {
     "name": "eco-app",
     "slug": "eco-app",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/bombom.png",
     "scheme": "ecoapp",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "statusBarHidden": true
+      "statusBarStyle": "dark"
     },
     "android": {
       "adaptiveIcon": {
@@ -26,11 +26,15 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.tiredrice123.ecoapp",
       "navigationBar": {
-        "visible": "leanback"
+        "visible": "immersive"
       },
       "statusBar": {
-        "hidden": true
-      }
+        "backgroundColor": "#007AFF",
+        "translucent": false,
+        "barStyle": "dark-content"
+      },
+      "softwareKeyboardLayoutMode": "pan",
+      "usesCleartextTraffic": false
     },
     "web": {
       "output": "static",
@@ -38,7 +42,15 @@
     },
     "plugins": [
       "expo-router",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      [
+        "expo-system-ui",
+        {
+          "android": {
+            "hideNavigationBar": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
