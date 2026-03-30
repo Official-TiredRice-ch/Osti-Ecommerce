@@ -6,6 +6,7 @@ const { logAction } = require('../middleware/auditLogger');
 
 // Public routes
 router.get('/products', logAction('product_search', 'search'), searchController.searchProducts);
+router.get('/hybrid', logAction('hybrid_search', 'search'), searchController.hybridSearch);
 router.get('/suggestions', searchController.getSearchSuggestions);
 router.get('/trending', searchController.getTrendingSearches);
 router.post('/build-external-query', searchController.buildExternalSearchQuery);

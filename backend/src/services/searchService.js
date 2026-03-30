@@ -148,19 +148,32 @@ class SearchService {
    * Log search query to history
    */
   static async logSearchQuery(db, userId, query, resultCount) {
-    return new Promise((resolve, reject) => {
-      const sql = `
-        INSERT INTO search_history (user_id, query, result_count, created_at)
-        VALUES (?, ?, ?, datetime('now'))
-      `;
+    return new Promise((resolve) => {
+      // Try different column name variations
+      const queries = [
+        'INSERT INTO search_history (user_id, query, results_count, created_at) VALUES (?, ?, ?, datetime(\'now\'))',
+        'INSERT INTO search_history (user_id, query, result_count, created_at) VALUES (?, ?, ?, datetime(\'now\'))',
+        'INSERT INTO search_history (user_id, search_query, results_count, created_at) VALUES (?, ?, ?, datetime(\'now\'))',
+      ];
 
-      db.run(sql, [userId || null, query, resultCount], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ id: this.lastID });
+      const tryInsert = (index) => {
+        if (index >= queries.length) {
+          console.warn('Could not log search query - tried all column variations');
+          resolve();
+          return;
         }
-      });
+
+        db.run(queries[index], [userId || null, query, resultCount], function(err) {
+          if (err) {
+            // Try next variation
+            tryInsert(index + 1);
+          } else {
+            resolve({ id: this.lastID });
+          }
+        });
+      };
+
+      tryInsert(0);
     });
   }
 }

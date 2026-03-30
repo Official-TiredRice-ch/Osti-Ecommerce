@@ -18,6 +18,13 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Request logging middleware
+app.use((req, res, next) => {
+  console.log(`\n[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Query params:', req.query);
+  next();
+});
+
 // Database setup
 const dbPath = path.join(__dirname, 'database', 'ecommerce.db');
 const db = new sqlite3.Database(dbPath, (err) => {

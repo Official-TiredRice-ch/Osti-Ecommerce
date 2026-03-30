@@ -1,10 +1,98 @@
 const SearchService = require('../services/searchService');
+const OnlineSearchService = require('../services/onlineSearchService');
+const RapidAPIService = require('../services/rapidAPIService');
 
 /**
  * Search Controller - Handles product search requests
  */
 
-// Search products
+// Hybrid search - Local + Online
+exports.hybridSearch = async (req, res) => {
+  try {
+    const { query, includeOnline, sources, minLocalResults } = req.query;
+    const userId = req.user?.id;
+
+    console.log('=== HYBRID SEARCH REQUEST ===');
+    console.log('Query:', query);
+    console.log('Include Online:', includeOnline);
+    console.log('Sources:', sources);
+
+    if (!query) {
+      return res.status(400).json({ error: 'Search query is required' });
+    }
+
+    const db = req.app.locals.db;
+    const options = {
+      minLocalResults: minLocalResults ? parseInt(minLocalResults) : 5,
+      sources: sources ? sources.split(',') : ['google', 'shopee', 'lazada'],
+    };
+
+    let results;
+
+    if (includeOnline === 'true') {
+      console.log('Performing hybrid search with online sources...');
+      
+      // Search local database
+      const localResults = await OnlineSearchService.searchLocal(db, query);
+      
+      // Search all online sources (Google, Shopee, Lazada, Kimstore)
+      const googleResults = await OnlineSearchService.searchGoogle(query);
+      const shopeeResults = await OnlineSearchService.searchShopee(query);
+      const lazadaResults = await OnlineSearchService.searchLazada(query);
+      const kimstoreResults = await OnlineSearchService.searchKimstore(query);
+      
+      const onlineResults = [
+        ...googleResults,
+        ...shopeeResults,
+        ...lazadaResults,
+        ...kimstoreResults,
+      ];
+      
+      results = {
+        local: localResults,
+        online: onlineResults,
+        combined: [...localResults, ...onlineResults.slice(0, 15)],
+      };
+    } else {
+      console.log('Local search only');
+      // Local search only
+      const localResults = await OnlineSearchService.searchLocal(db, query);
+      results = {
+        local: localResults,
+        online: [],
+        combined: localResults,
+      };
+    }
+
+    console.log('Results breakdown:', {
+      local: results.local.length,
+      online: results.online.length,
+      combined: results.combined.length,
+    });
+
+    // Log search query
+    try {
+      await SearchService.logSearchQuery(db, userId, query, results.combined.length);
+    } catch (logError) {
+      console.warn('Could not log search query:', logError.message);
+    }
+
+    res.json({
+      query,
+      resultCount: results.combined.length,
+      results: results.combined,
+      breakdown: {
+        local: results.local.length,
+        online: results.online.length,
+      },
+    });
+  } catch (error) {
+    console.error('Hybrid search error:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Search products (local only)
 exports.searchProducts = async (req, res) => {
   try {
     const { query, minPrice, maxPrice, categoryId, inStock, sortBy, page, limit } = req.query;
