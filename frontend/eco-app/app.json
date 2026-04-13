@@ -2,7 +2,7 @@
   "expo": {
     "name": "eco-app",
     "slug": "eco-app",
-    "version": "1.0.4",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/bombom.png",
     "scheme": "ecoapp",
@@ -69,6 +69,12 @@
       "eas": {
         "projectId": "dd80ee7a-b596-48dc-94cb-a4f68645a45b"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/dd80ee7a-b596-48dc-94cb-a4f68645a45b"
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     },
     "owner": "tiredrice123"
   }
