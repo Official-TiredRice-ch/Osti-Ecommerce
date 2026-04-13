@@ -4,9 +4,13 @@ const productController = require('../controller/productController');
 const { authenticate, authorize } = require('../middleware/auth');
 const { logAction } = require('../middleware/auditLogger');
 
+console.log('✅ Product routes loaded - bestsellers route registered');
+
 // Public routes
 router.get('/', productController.getAllProducts);
 router.get('/stats', productController.getProductStats);
+router.get('/best-sellers', productController.getBestsellers);
+router.get('/featured-products', productController.getFeaturedProducts);
 router.get('/category/:categoryId', productController.getProductsByCategory);
 router.get('/:productId', productController.getProductById);
 

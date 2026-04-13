@@ -96,6 +96,7 @@ exports.getAllProducts = (req, res) => {
 
 // Get product by ID
 exports.getProductById = (req, res) => {
+  console.log('🔍 getProductById called with ID:', req.params.productId);
   const { productId } = req.params;
   const db = req.app.locals.db;
 
@@ -293,5 +294,61 @@ exports.getProductStats = (req, res) => {
         res.json({ stats });
       }
     });
+  });
+};
+
+// Get bestseller products
+exports.getBestsellers = (req, res) => {
+  console.log('🎯 getBestsellers called!');
+  const { limit = 6 } = req.query;
+  const db = req.app.locals.db;
+
+  const sql = `
+    SELECT p.*, c.name as category_name
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    WHERE p.stock > 0
+    ORDER BY p.created_at DESC
+    LIMIT ?
+  `;
+
+  db.all(sql, [parseInt(limit)], (err, products) => {
+    if (err) {
+      logger.error('Error fetching bestsellers', err);
+      return res.status(500).json({ error: 'Failed to fetch bestsellers' });
+    }
+
+    res.json({ products, count: products.length });
+  });
+};
+
+// Get featured products by category
+exports.getFeaturedProducts = (req, res) => {
+  const { category, limit = 4 } = req.query;
+  const db = req.app.locals.db;
+
+  let sql = `
+    SELECT p.*, c.name as category_name
+    FROM products p
+    LEFT JOIN categories c ON p.category_id = c.id
+    WHERE p.stock > 0
+  `;
+  const params = [];
+
+  if (category) {
+    sql += ` AND c.name LIKE ?`;
+    params.push(`%${category}%`);
+  }
+
+  sql += ` ORDER BY p.created_at DESC LIMIT ?`;
+  params.push(parseInt(limit));
+
+  db.all(sql, params, (err, products) => {
+    if (err) {
+      logger.error('Error fetching featured products', err);
+      return res.status(500).json({ error: 'Failed to fetch featured products' });
+    }
+
+    res.json({ products, count: products.length });
   });
 };
